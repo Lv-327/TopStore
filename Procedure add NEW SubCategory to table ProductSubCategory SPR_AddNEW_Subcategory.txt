@@ -1,0 +1,28 @@
+GO 
+CREATE PROCEDURE SPR_AddNEW_Subcategory(@new_SUBCAT nvarchar(50), @s int)
+AS
+BEGIN
+SET NOCOUNT ON;
+-- ----------------------------------------
+BEGIN 
+
+IF @s=1
+insert into dbo.ProductSubCategories (CategoryID, CategoryName,  SubcategoryName ) values(@s,'Cholovichyi odyah',@new_SUBCAT)
+else if @s=2
+insert into dbo.ProductSubCategories (CategoryID, CategoryName,  SubcategoryName ) values(@s,'Zhinochyi odyah',@new_SUBCAT)
+else if @s=3
+insert into dbo.ProductSubCategories (CategoryID, CategoryName,  SubcategoryName ) values(@s,'Dytyachyi odyah hlopchyky',@new_SUBCAT)
+else if @s=4
+insert into dbo.ProductSubCategories (CategoryID, CategoryName,  SubcategoryName ) values(@s,'Dytyachyi odyah divchata',@new_SUBCAT )
+else
+print 'ERROR'
+END 
+-- ----------------------------------------
+SET NOCOUNT OFF
+END;
+
+ go 
+Drop PROCEDURE SPR_AddNEW_Subcategory
+-- ================================================
+go
+exec dbo.SPR_AddNEW_Subcategory 'shoes', 5

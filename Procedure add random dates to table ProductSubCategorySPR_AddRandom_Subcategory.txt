@@ -1,0 +1,58 @@
+CREATE PROCEDURE SPR_AddRandom_Subcategory(@Quantity INT)
+AS
+BEGIN
+SET NOCOUNT ON;
+DECLARE @LoopCount INT= 0,
+ -- ----------------------------------------
+@i int,
+
+@x1 nvarchar(50) ,
+@x2 nvarchar(50) ,
+@r1 decimal,
+@r2 decimal,
+@a1 nvarchar(50),
+@a2 nvarchar(50)
+-- set @end_number = 2000
+set @i = 0
+SET IDENTITY_INSERT  ProductSubCategories ON
+while @i < @Quantity
+BEGIN
+set @r1 = CEILING(rand()*4) --рандом для статі
+set @r2 = CEILING(rand()*45) --рандом для субкатегорій
+
+ set @x1 = @r1
+ set @x2 = @r2
+  begin
+   set @a1 = (select category from dbo.Table_1 where id = @r1)
+  end
+  if @r1 =1
+   begin
+     set @a2 = (select CholovichyyOdyah from dbo.Table_1 where id = @r2)
+   end
+  else if  @r1 =2
+  begin
+   set @a2 = (select ZhinochyyOdyah from dbo.Table_1 where id = @r2)
+  end
+  else if  @r1 =3
+  begin
+   set @a2 = (select DytyachyyOdyahKhlopchyky from dbo.Table_1 where id = @r2)
+  end
+  else
+  begin
+   set @a2 = (select DytyachyyOdyahDivchata from dbo.Table_1 where id = @r2)
+   END
+  
+   insert into ProductSubCategories (CategoryID, CategoryName, SubCategoryID, SubcategoryName ) values(@x1,@a1,@x2,@a2)
+
+set @i +=1
+END
+SET IDENTITY_INSERT ProductSubCategories OFF
+-- ----------------------------------------
+SET NOCOUNT OFF
+END;
+-----------------------------------------------
+ go 
+Drop PROCEDURE SPR_AddRandom_Subcategory
+-- ================================================
+go
+exec SPR_AddRandom_Subcategory 1000
