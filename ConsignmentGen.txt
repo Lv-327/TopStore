@@ -1,0 +1,70 @@
+CREATE PROCEDURE gnrt_ConsignmentForStock
+@StockID INT,
+@DATE DATE 
+AS
+DECLARE @ConsignmentSize INT
+DECLARE @EmployeeID INT
+DECLARE @ConsignmentID INT
+DECLARE @ProductID int
+DECLARE @VendorID INT
+DECLARE @VendorPrice MONEY
+DECLARE @ProductQuantity INT
+BEGIN
+	SET @ConsignmentSize = FLOOR(RAND()*50)+10
+	SET @EmployeeID = (SELECT BusinessUnitManagerID FROM dbo.BusinessUnits WHERE BusinessUnitID = @StockID)
+	INSERT INTO dbo.Consignments(ConsignmentDate,EmployeeID,BusinessUnitID)
+	VALUES
+	(   
+	    @DATE, 
+	    @EmployeeID,         
+	    @StockID          
+	    )	
+	SET @ConsignmentID = SCOPE_IDENTITY()
+	DECLARE RandomProducts CURSOR
+	FOR SELECT TOP(@ConsignmentSize)ProductID,VendorID,VendorPrice 
+	FROM dbo.Products 
+	WHERE Active =1 
+	ORDER BY NEWID()
+	
+	OPEN RandomProducts
+	FETCH NEXT FROM RandomProducts INTO @ProductID,@VendorID,@VendorPrice
+	WHILE(@@fetch_status <> -1)
+	BEGIN
+		SET @ProductQuantity = FLOOR(RAND()*100)+40
+		INSERT INTO dbo.ConsignmentsDetails	(ConsignmentNumber,VendorID,ProductID,Quantity,VendorPrice)	
+		VALUES
+		(   @ConsignmentID,
+		    @VendorID,   
+		    @ProductID,   
+		    @ProductQuantity,   
+		    @VendorPrice
+		)
+		FETCH NEXT FROM RandomProducts INTO @ProductID,@VendorID,@VendorPrice
+	END
+	CLOSE RandomProducts
+	DEALLOCATE RandomProducts
+END
+GO
+
+CREATE PROCEDURE gnrt_FillConsignments
+AS
+DECLARE @BUID INT
+BEGIN
+	DECLARE BUnits CURSOR
+	FOR SELECT BusinessUnitID 
+	FROM dbo.BusinessUnits
+	
+	OPEN BUnits
+	FETCH NEXT FROM BUnits INTO @BUID
+	DECLARE @RandDate DATE
+	WHILE(@@FETCH_STATUS <> -1)
+	BEGIN
+		SET @RandDate = DATEADD(DAYOFYEAR,DATEDIFF(DAYOFYEAR,'2018-01-01',GETDATE())*(RAND())+1,'2018-01-01')
+		EXEC dbo.gnrt_ConsignmentForStock @StockID = @BUID,        
+		                                     @DATE = @RandDate
+		FETCH NEXT FROM BUnits INTO @BUID
+	END
+	CLOSE BUnits
+	DEALLOCATE BUnits
+END
+GO
